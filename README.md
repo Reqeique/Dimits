@@ -1,16 +1,16 @@
 
-# **Dimits : Python Bindings for Piper TTS**
+# **Dimits - Python Bindings for Piper TTS**
 
 
 Dimits is a Python library that provides an easy-to-use interface to the Piper text-to-speech (TTS) system. It utilizes the powerful Piper TTS engine, which is optimized for Raspberry Pi 4, to generate high-quality synthesized speech.
-
+> 
 ## Features
 
 * Simple Python bindings for Piper TTS
 * Support for multiple languages and voices
 * Compatible with Raspberry Pi 3/4 and desktop Linux systems
 
-## Installation
+## Installation 📥
 
 You can install Dimits via pip:
 
@@ -18,9 +18,9 @@ You can install Dimits via pip:
 pip install dimits
 ```
 
-This will automatically install the necessary dependencies, including the `piper` package.
+This will automatically install the necessary dependencies
 
-## Quick Start
+## Quick Start 🏃🏻‍♀️
 
 Here's a simple example of using Dimits to synthesize speech:
 
@@ -34,20 +34,20 @@ dt = Dimits("voice-en-us-amy-low")
 dt.text_2_speech("Hello World", engine="aplay")
 ```
 
-## Voices
+## Voices 🔊
 
 Dimits supports all the voices available in the Piper TTS system. To use a specific voice, simply provide  corresponding `.onnx` file namepo initializing the `Dimits` class.
 
 For a list of available voices and their download links, refer to the [Piper TTS repository](https://github.com/rhasspy/piper/releases/tag/v0.0.2).
 
-## Usage
+## Usage 📃
 
 ### Initializing Dimits
 
 To use Dimits, first create an instance of the `Dimits` class, providing the path to the desired voice model:
 
 ```python
-from dimits.main import Dimits
+from dimits import Dimits
 
 dt = Dimits("voice-en-us-amy-low")
 ```
@@ -57,7 +57,7 @@ dt = Dimits("voice-en-us-amy-low")
 To synthesize speech and play on the go, simply call the `text_2_speech` method, providing the text to be synthesized and the desired engine:
 
 ```python
-dt.text_2_speech("This is a test.")
+dt.text_2_speech("This is a test.",engine='aplay')
 ```
 
 on other hand to synthesize speech and save it to the file, call `text_2_audio_file` finction providing `file_name` `dir` and `format`
@@ -74,14 +74,14 @@ To change the voice used for synthesis, create a new instance of the `Dimits` cl
 # dt = Dimits("voice-en-us-amy-low")
 dt = Dimits("voice-en-us-danny-low")
 ```
-## TODO
-* Implement windows compatible executible to run the voice models
+## TODO 📝
+* ~~Implement windows compatible executible to run the voice models~~
 * Support for multiple audio player engine
 * Benchmark
 * Documentation
 
 
-## License
+## License 🪪
 
 This project is licensed under the [MIT License](LICENSE).
 

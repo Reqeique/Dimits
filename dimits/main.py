@@ -1,12 +1,13 @@
 import os
 
 from dimits.utils import download, untar, logger
-import requests
 
+from dimits.ttsmodel import TextToSpeechModel as ttsm
+import requests
+import shutil
 import platform
 
 import requests
-from tqdm import tqdm
 
 from pathlib import Path
 
@@ -33,59 +34,22 @@ class Dimits():
         """
         self.verbose = verbose
         # Define the URL for the latest release of piper
-        arch = str(self._get_arch())
-        if self._get_arch() == 'unsupported_machine': 
+        arch = str(self._get_os())
+        if self._get_os() == 'unsupported_machine': 
             logger(err= f'{arch} Detected', verbose=verbose)
-            
-        if self._get_arch() == 'unsupported_machine': return
-        logger(msg= f'{arch} Detected', verbose=verbose)
+            return 
 
         home = str(Path.home())
         
         self.voice = voice
         self.folder = 'piper'
-        self.piper_bin_zip = f'piper_{arch}.tar.gz'
+      
         
         self.parent_destn = os.path.join(home, self.folder)
         if not os.path.exists(self.parent_destn):
             os.mkdir(self.parent_destn)
 
-        # Set the full filepath for the downloaded file
-        self.filepath = os.path.join(self.parent_destn, self.piper_bin_zip)
-
-        #Download the binary if it does not exist
-        if not os.path.exists(self.filepath):
-            latest_releases_url = f"https://api.github.com/repos/rhasspy/piper/releases/latest"
-
-        # Fetch the latest release information from Github API
-            latest_releases_response = requests.get(latest_releases_url)
-    
-            # Parse the latest version number from the API response
-            if latest_releases_response.status_code == 200:
-                # Parse the api JSON to extract the release version
-                release_info = latest_releases_response.json()
-                latest_release = release_info["tag_name"]
-
-            # Set the URL for the binary download
-            binary_url = f"https://github.com/rhasspy/piper/releases/download/{latest_release}/{self.piper_bin_zip}"
-
-            # Download the binary file and check for errors
-            response = download(binary_url, self.filepath,
-                                self.piper_bin_zip, verbose=verbose)
-
-            # If the response is a tuple, extract the filepath and filename and untar the file
-            if type(response) is tuple:
-                fp, f = response
-                untar(fp, f, verbose=verbose)
-            # If the response is an integer, log an error message
-            elif type(response) is int:
-                logger(err=f"Can't Download {self.piper_bin_zip}", verbose=verbose)
-
-        # Set the path to the piper binary file
-        self.piper_binary = os.path.join(self.parent_destn, 'piper', 'piper')
-
-        # print(self.binary)
-
+       
         # Download the voice if it does not exist
         self._download_voice(voice)
 
@@ -94,23 +58,16 @@ class Dimits():
         self.voice_onnx = voice
         self.voice_onnx = os.path.join(
         self.parent_destn, str(self.voice_onnx).replace('voice-', '') + '.onnx')
-        logger('Using' + str(self.voice_onnx), verbose=verbose)
+        logger('Using ' + str(self.voice_onnx), verbose=verbose)
 
     
     @staticmethod    
-    def _get_arch(_: str = '') -> str:
+    def _get_os() -> str:
+        if (platform.system() in ['Windows', 'Linux']):
+            return  platform.system();
+        else: 
+            return "unsupported_machine"
 
-        if platform.system() == 'Linux':
-            if platform.machine() == 'aarch64':
-                return 'arm64'
-            elif platform.machine() == 'amd64' or platform.machine() == 'x86_64':
-                return 'amd64'
-            elif platform.machine().startswith('armv7'):
-
-                return 'armv7'
-        else :
-
-            return ('unsupported_machine')
       
     @staticmethod
     def list_voice() -> list[str]:
@@ -149,7 +106,7 @@ class Dimits():
                 
            
 
-    def text_2_audio_file(self, text: str, filename: str, directory: str, format: str = 'wav', **kwargs: str) -> str:
+    def text_2_audio_file(self, text: str, filename: str, directory: str, format: str = 'wav') -> str:
         r"""
 
         Convert the provided text to a human-sounding audio file using a text-to-speech engine, and save it to disk.
@@ -172,16 +129,15 @@ class Dimits():
             >>> # Outputs an audio file named "hello_world.wav" in the directory "/path/to/output/directory/".
 
        """
-        if self._get_arch() == 'unsupported_machine': return
+        if self._get_os() == 'unsupported_machine': return
         if not os.path.exists(directory):
             os.mkdir(directory)
         filepath = os.path.join(directory, f'{filename}.{format}')
-
-        param = (' ').join(
-            list([f'--{_} {__}'for _, __ in tuple(kwargs.items())]))
-        command = f"""echo \"{text}\" |sudo {self.piper_binary} --model {self.voice_onnx} --output_file {filepath} {param}"""
-        logger(command, verbose=self.verbose)
-        os.system(command)
+        
+     
+        out_bin = ttsm(self.voice_onnx).synthesize(text,length_scale=1.0, noise_scale=1.0, noise_w=1.0)
+        with open(filepath, 'wb') as f:
+            f.write(out_bin)
 
         return filepath
 
@@ -204,12 +160,12 @@ class Dimits():
             >>> dd = ...
             >>> dd.text_file_2_audio_file(file_path,'hello', dir,)
         """
-        if self._get_arch() == 'unsupported_machine': return
+        if self._get_os() == 'unsupported_machine': return
         with open(text_file_path, encoding=encoding) as f:
            return self.text_2_audio_file(f.readline(), audio_filename, directory, audio_format, **kwargs)
 
 
-    def text_2_speech(self, text: str, engine: str = 'aplay', **kwargs: str) -> None:
+    def text_2_speech(self, text: str, engine: str = None , **kwargs: str) -> None:
         
         r"""
         Convert the provided text to human-sounding audio and play the audio file on-the-go.
@@ -229,20 +185,43 @@ class Dimits():
             >>> dt.text_2_speech("Hello World", "aplay"")
             >>> # plays the audio to the default audio output device using the 'alsa' engine.
         """
-        if self._get_arch() == 'unsupported_machine': return
+        
+        if self._get_os() == 'unsupported_machine': return
         cache_dir  = os.path.join(self.parent_destn, 'cache')
-        os.system(f'{engine} --stop')
-        os.system(f'rm -rf {cache_dir}/*')
+        if os.path.isdir(cache_dir):
+            shutil.rmtree(cache_dir)
+            os.mkdir(cache_dir)
+
         filepath = self.text_2_audio_file(
-            text, 'main', directory=cache_dir, **kwargs)
+                       text, 'main', directory=cache_dir, )
+        if platform.system() == 'Linux':
         
-        
-        os.system(f'{engine} {filepath}')
+           os.system(f'killall {engine}')
+           if engine == None: engine = 'aplay'
+           
+           if engine == 'aplay':
+              os.system(f'{engine} {filepath}')
+           else:
+               pass
+        elif platform.system() == 'Windows':
+            if engine == None:  engine = 'System.Media.SoundPlayer'
+
+
+           
+            if engine == 'System.Media.SoundPlayer':
+               cmd = f"""powershell (New-Object {engine} {filepath}).PlaySync()"""
+               os.system(cmd )
+           
     
  
 
+print(Dimits.list_voice())
+Dimits("voice-en-us-danny-low").text_2_speech(text="""
+Here is a randomly generated short story:
 
+It was a dark and stormy night. John was home alone, sitting in his living room reading a book. The wind howled outside as the rain pattered against the windows. Suddenly, there was a loud crash from the kitchen. John jumped up, his heart racing. What was that?
 
-Dimits("voice-en-us-amy-low")
+As John slowly walked towards the kitchen, he could hear a strange skittering sound. He flipped on the light switch, but the power was out. Grabbing a flashlight from a drawer, he shined it around the room. In the beam of light, John saw the shattered remains of a flower vase on the floor.""", filename='test', directory='C:\\Users\\Ananiya\\PyProject\\PyPiperTTS\\dimits')
+
 
 
