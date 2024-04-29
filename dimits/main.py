@@ -215,13 +215,13 @@ class Dimits():
     
  
 
-print(Dimits.list_voice())
-Dimits("voice-en-us-danny-low").text_2_speech(text="""
-Here is a randomly generated short story:
+# print(Dimits.list_voice())
+# Dimits("voice-en-us-danny-low").text_2_speech(text="""
+# Here is a randomly generated short story:
 
-It was a dark and stormy night. John was home alone, sitting in his living room reading a book. The wind howled outside as the rain pattered against the windows. Suddenly, there was a loud crash from the kitchen. John jumped up, his heart racing. What was that?
+# It was a dark and stormy night. John was home alone, sitting in his living room reading a book. The wind howled outside as the rain pattered against the windows. Suddenly, there was a loud crash from the kitchen. John jumped up, his heart racing. What was that?
 
-As John slowly walked towards the kitchen, he could hear a strange skittering sound. He flipped on the light switch, but the power was out. Grabbing a flashlight from a drawer, he shined it around the room. In the beam of light, John saw the shattered remains of a flower vase on the floor.""", filename='test', directory='C:\\Users\\Ananiya\\PyProject\\PyPiperTTS\\dimits')
+# As John slowly walked towards the kitchen, he could hear a strange skittering sound. He flipped on the light switch, but the power was out. Grabbing a flashlight from a drawer, he shined it around the room. In the beam of light, John saw the shattered remains of a flower vase on the floor.""", filename='test', directory='C:\\Users\\Ananiya\\PyProject\\PyPiperTTS\\dimits')
 
 
 
