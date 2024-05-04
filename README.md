@@ -28,7 +28,7 @@ Here's a simple example of using Dimits to synthesize speech:
 from dimits import Dimits
 
 # Initialize Dimits with the desired voice model
-dt = Dimits("voice-en-us-amy-low")
+dt = Dimits("en_US-amy-low")
 
 # Convert text to audio and play it using the aplay engine
 dt.text_2_speech("Hello World", engine="aplay")
@@ -49,7 +49,7 @@ To use Dimits, first create an instance of the `Dimits` class, providing the pat
 ```python
 from dimits import Dimits
 
-dt = Dimits("voice-en-us-amy-low")
+dt = Dimits("en_US-amy-low")
 ```
 
 ### Synthesizing Speech
@@ -71,8 +71,8 @@ dt.text_2_audio_file("Hello World", "hello_world", "/path/to/output/directory/",
 To change the voice used for synthesis, create a new instance of the `Dimits` class with the desired voice model:
 
 ```python
-# dt = Dimits("voice-en-us-amy-low")
-dt = Dimits("voice-en-us-danny-low")
+# dt = Dimits("en_US-amy-low")
+dt = Dimits("en_US-danny-low")
 ```
 ## TODO 📝
 * ~~Implement windows compatible executible to run the voice models~~

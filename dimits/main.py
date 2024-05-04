@@ -1,28 +1,31 @@
 import os
 
-from dimits.utils import download, untar, logger
+from dimits.utils import download,  logger
 
 from dimits.ttsmodel import TextToSpeechModel as ttsm
 import requests
 import shutil
+
+from huggingface_hub import hf_hub_url,snapshot_download,hf_hub_download
 import platform
 
 import requests
 
 from pathlib import Path
-
+from huggingface_hub import HfFileSystem
 
 
 
 class Dimits():
     """Dimits"""         
-    def __init__(self, voice: str, verbose: bool = True):
+    def __init__(self, voice: str, verbose: bool = True, modelDirectory: str = None):
         """
         Initialize a new instance of Dimits with the provided voice and verbosity.
 
         Args:
             voice (str): The voice to use for text-to-speech.
             verbose (bool): Whether to print verbose output.
+            model (str): represents the local path to the model file. If not provided (i.e., None), the default behavior is to utilize the model hosted on GitHub.
 
         Returns:
             None
@@ -30,22 +33,27 @@ class Dimits():
 
         Example:
             >>> from Dimits import Dimits
-            >>> dt = Dimits("voice-en-us-amy-low")
+            >>> dt = Dimits("en_US-amy-low")
         """
         self.verbose = verbose
+       
         # Define the URL for the latest release of piper
+
         arch = str(self._get_os())
         if self._get_os() == 'unsupported_machine': 
             logger(err= f'{arch} Detected', verbose=verbose)
             return 
 
-        home = str(Path.home())
+        home =  Path.home()
         
         self.voice = voice
         self.folder = 'piper'
+
+        self._repo_id = "rhasspy/piper-voices"
       
         
-        self.parent_destn = os.path.join(home, self.folder)
+        self.parent_destn = modelDirectory if modelDirectory is not None else os.path.join(home, self.folder)
+        
         if not os.path.exists(self.parent_destn):
             os.mkdir(self.parent_destn)
 
@@ -57,7 +65,7 @@ class Dimits():
 
         self.voice_onnx = voice
         self.voice_onnx = os.path.join(
-        self.parent_destn, str(self.voice_onnx).replace('voice-', '') + '.onnx')
+        self.parent_destn, str(self.voice_onnx) + '.onnx')
         logger('Using ' + str(self.voice_onnx), verbose=verbose)
 
     
@@ -81,27 +89,32 @@ class Dimits():
              list[str] : Supported voice
         """
         
-        releases_url = f"https://api.github.com/repos/rhasspy/piper/releases"
-
-        response = requests.get(releases_url)
-
-        data = response.json()
-
-        return [[str(asset['name']).split('.')[0] for asset in release['assets'] if asset['name'].startswith('voice')] for release in data][-1]
+        fs = HfFileSystem()
+ 
+        return [_.split("/")[-1].split(".")[0] for _ in fs.glob(f"{self._repo_id}/**.onnx", detail=False)]
 
         # return
 
     def _download_voice(self, name, verbose: bool = True):
-        filename = f'{name}.tar.gz'
+        print(name)
+        locale, p, pitch = name.split('-')
+        lang, cc = locale.split("_")
+        filename =  f"""{name}.onnx"""
+        filename2 = f"""{name}.onnx.json"""
         filepath = os.path.join(self.parent_destn, filename)
-        if not os.path.exists(filepath):
-            filename = f'{name}.tar.gz'
-            download_url = f'https://github.com/rhasspy/piper/releases/download/v0.0.2/{filename}'
-
+        filepath2 = os.path.join(self.parent_destn, filename2)
+      
+        if not os.path.exists(filepath) or not os.path.exists(filepath2) :
+        
             
-            if type(download(download_url, filepath, filename, verbose)) is tuple:
-                fp, f = tuple(download(download_url, filepath, filename, verbose))
-                untar(fp, f, verbose)
+
+
+        
+
+            url =hf_hub_url(repo_id=self._repo_id,filename=f"{lang}/{locale}/{p}/{pitch}/{name}.onnx")
+            url2 = hf_hub_url(repo_id=self._repo_id,filename=f"{lang}/{locale}/{p}/{pitch}/{name}.onnx.json")
+            download(url, filepath, filename, verbose)
+            download(url2, filepath2, filename2, verbose) 
             
                 
            
@@ -214,14 +227,4 @@ class Dimits():
            
     
  
-
-# print(Dimits.list_voice())
-# Dimits("voice-en-us-danny-low").text_2_speech(text="""
-# Here is a randomly generated short story:
-
-# It was a dark and stormy night. John was home alone, sitting in his living room reading a book. The wind howled outside as the rain pattered against the windows. Suddenly, there was a loud crash from the kitchen. John jumped up, his heart racing. What was that?
-
-# As John slowly walked towards the kitchen, he could hear a strange skittering sound. He flipped on the light switch, but the power was out. Grabbing a flashlight from a drawer, he shined it around the room. In the beam of light, John saw the shattered remains of a flower vase on the floor.""", filename='test', directory='C:\\Users\\Ananiya\\PyProject\\PyPiperTTS\\dimits')
-
-
 

@@ -4,26 +4,11 @@ import os
 import datetime
 from tqdm import tqdm
 import requests
-def untar(filepath,parent_destn, verbose: bool = True):
-        with tarfile.open(filepath, 'r:gz') as tar:
-            # Get the total size of the archive
-            total_size = sum([member.size for member in tar.getmembers()])
-        
-            # Initialize the progress bar
-            progress_bar = tqdm(desc='Extracting', total=total_size, unit='iB', unit_scale=True)
-        
-            # Extract each file in the archive
-            for member in tar.getmembers():
-                tar.extract(member, path=parent_destn)
-                progress_bar.update(member.size)
-        
-            # Close the progress bar
-            progress_bar.close()
-        
-            logger(f'Extracted files to {parent_destn}')
+
 
 def download(url:str, filepath:str, filename:str, verbose:bool = True) -> tuple:
     folder = os.path.dirname(filepath)
+    print(url, filepath, filename, folder)
     response = requests.get(url,stream=True)
     if response.status_code == 200:
         total_size = int(response.headers.get('content-length', 0))

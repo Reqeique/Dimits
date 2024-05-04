@@ -1,11 +1,11 @@
-__version__ = "0.0.21-alpha"
+__version__ = "0.0.3-alpha"
 __author__ = "Reqeique"
 
 
 
 
 from dimits.ttsmodel import TextToSpeechModel, TTSConfig
-from .utils import untar, download, logger
+from .utils import download, logger
 from .main import Dimits
 
 
