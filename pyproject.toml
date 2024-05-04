@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dimits"
-version = "0.0.3-alpha"
+version = "0.0.30-alpha"
 description = "Dimits is a Python library that provides an easy-to-use interface to the Piper text-to-speech (TTS) system. It utilizes the powerful Piper TTS engine, which is optimized for Raspberry Pi 4, to generate high-quality synthesized speech."
 authors = ["Reqeique <ananiyajemberu21@gmail.com>"]
 readme = "README.md"
