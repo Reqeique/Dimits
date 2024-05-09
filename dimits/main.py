@@ -68,6 +68,8 @@ class Dimits():
         self.parent_destn, str(self.voice_onnx) + '.onnx')
         logger('Using ' + str(self.voice_onnx), verbose=verbose)
 
+        #Initialize TTS ONNX model
+        self.tts_model = ttsm(self.voice_onnx)
     
     @staticmethod    
     def _get_os() -> str:
@@ -148,7 +150,7 @@ class Dimits():
         filepath = os.path.join(directory, f'{filename}.{format}')
         
      
-        out_bin = ttsm(self.voice_onnx).synthesize(text,length_scale=1.0, noise_scale=1.0, noise_w=1.0)
+        out_bin = self.tts_model.synthesize(text,length_scale=1.0, noise_scale=1.0, noise_w=1.0)
         with open(filepath, 'wb') as f:
             f.write(out_bin)
 
