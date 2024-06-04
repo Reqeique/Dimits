@@ -100,6 +100,10 @@ class TextToSpeechModel:
         length_scale = length_scale or self.config.inference.length_scale
         noise_scale = noise_scale or self.config.inference.noise_scale
         noise_w = noise_w or self.config.inference.noise_w
+
+        # Set default speaker
+        if (self.config.num_speakers > 1) and (speaker_id is None):
+            speaker_id = 0
         
         # Convert text to phonemes
         phonemes = self._text_to_phonemes(text)
@@ -152,7 +156,7 @@ class TextToSpeechModel:
             "input": phoneme_ids,
             "input_lengths": length, 
             "scales": scales,
-            "speaker": speaker
+            "sid": speaker
         }
 
     def _float_to_int16(self, audio: np.ndarray) -> np.ndarray:
