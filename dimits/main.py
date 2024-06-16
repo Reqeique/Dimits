@@ -18,7 +18,7 @@ from huggingface_hub import HfFileSystem
 
 class Dimits():
     """Dimits"""         
-    def __init__(self, voice: str, verbose: bool = True, modelDirectory: str = None):
+    def __init__(self, voice: str, verbose: bool = True, modelDirectory: str = None, speaker_id: int = None):
         """
         Initialize a new instance of Dimits with the provided voice and verbosity.
 
@@ -26,7 +26,8 @@ class Dimits():
             voice (str): The voice to use for text-to-speech.
             verbose (bool): Whether to print verbose output.
             model (str): represents the local path to the model file. If not provided (i.e., None), the default behavior is to utilize the model hosted on GitHub.
-
+            speaker_id (int): A particular speaker from the voice. The first one is used by default.
+            
         Returns:
             None
         
@@ -64,6 +65,7 @@ class Dimits():
         # Set the path to the ONNX voice file
 
         self.voice_onnx = voice
+        self.speaker = speaker_id
         self.voice_onnx = os.path.join(
         self.parent_destn, str(self.voice_onnx) + '.onnx')
         logger('Using ' + str(self.voice_onnx), verbose=verbose)
@@ -150,7 +152,7 @@ class Dimits():
         filepath = os.path.join(directory, f'{filename}.{format}')
         
      
-        out_bin = self.tts_model.synthesize(text,length_scale=1.0, noise_scale=1.0, noise_w=1.0)
+        out_bin = self.tts_model.synthesize(text,length_scale=1.0, noise_scale=1.0, noise_w=1.0, speaker_id=self.speaker)
         with open(filepath, 'wb') as f:
             f.write(out_bin)
 
