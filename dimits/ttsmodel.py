@@ -84,7 +84,7 @@ class TextToSpeechModel:
       
         self.phonemizer = Phonemizer(self.config.espeak.voice)
         self.model = ort.InferenceSession(str(model_path),sess_options=ort.SessionOptions(),
-            providers= ["CPUExecutionProvider"] if(use_cpu == False) else ['CUDAExecutionProvider']
+            providers= ["CPUExecutionProvider"] if(use_cpu == True) else ['CUDAExecutionProvider']
            )
 
     def synthesize(
